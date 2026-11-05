@@ -59,7 +59,7 @@ In Claude Code:
 /plugin install confluence-render@confluence-render
 ```
 
-Claude asks for these settings:
+Then run `/plugin configure confluence-render@confluence-render` and fill in:
 
 | Setting | Where to get it |
 | --- | --- |
