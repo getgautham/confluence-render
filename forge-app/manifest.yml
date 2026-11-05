@@ -1,0 +1,33 @@
+modules:
+  macro:
+    - key: render-file
+      resource: render
+      resolver:
+        function: resolver
+      title: Markdown & HTML file
+      description: Show a .md or .html file attached to this page.
+      config:
+        resource: config
+        title: Markdown & HTML file
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: render
+    path: static/render
+  - key: config
+    path: static/config
+permissions:
+  scopes:
+    - read:page:confluence
+    - read:attachment:confluence
+    - readonly:content.attachment:confluence
+  content:
+    styles:
+      - unsafe-inline
+    scripts:
+      - unsafe-inline
+app:
+  runtime:
+    name: nodejs24.x
+  id: ari:cloud:ecosystem::app/8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e

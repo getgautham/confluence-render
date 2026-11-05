@@ -1,0 +1,22 @@
+{
+  "name": "confluence-render-forge-app",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/",
+    "preview": "node build.mjs --preview && python3 -m http.server 8765 -d .preview",
+    "deploy": "npm run build && forge deploy -e production"
+  },
+  "dependencies": {
+    "@forge/api": "^8.4.0",
+    "@forge/resolver": "^2.0.2"
+  },
+  "devDependencies": {
+    "@forge/bridge": "^7.2.1",
+    "dompurify": "^3.4.17",
+    "esbuild": "^0.28.2",
+    "markdown-it": "^15.0.3"
+  }
+}

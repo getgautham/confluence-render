@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "confluence": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/index.mjs"],
+      "env": {
+        "CONFLUENCE_SITE": "${user_config.site}",
+        "CONFLUENCE_EMAIL": "${user_config.email}",
+        "CONFLUENCE_API_TOKEN": "${user_config.api_token}",
+        "CONFLUENCE_MACRO_KEY": "${user_config.macro_key}"
+      }
+    }
+  }
+}

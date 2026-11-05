@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Revenue dashboard</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 0; padding: 24px; background: #FBF7EF; color: #2B2118; }
+    h1 { margin: 0 0 12px; font-size: 28px; }
+    .bars { display: flex; gap: 10px; align-items: flex-end; height: 160px; }
+    .bar { width: 40px; background: #C2552F; }
+    #js { margin-top: 16px; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Revenue by month</h1>
+  <div class="bars">
+    <div class="bar" style="height:40%"></div>
+    <div class="bar" style="height:65%"></div>
+    <div class="bar" style="height:90%"></div>
+  </div>
+  <p id="js">Scripts are off.</p>
+  <script>
+    document.getElementById('js').textContent = 'Scripts ran.';
+    try { document.getElementById('js').textContent += ' parent reachable: ' + !!parent.document; }
+    catch (e) { document.getElementById('js').textContent += ' Parent is locked away.'; }
+  </script>
+</body>
+</html>

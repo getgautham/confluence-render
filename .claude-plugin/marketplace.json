@@ -1,0 +1,16 @@
+{
+  "name": "confluence-render",
+  "owner": {
+    "name": "Gautham S"
+  },
+  "metadata": {
+    "description": "Open-source Confluence publishing for Claude: Markdown and HTML files, shown in full."
+  },
+  "plugins": [
+    {
+      "name": "confluence-render",
+      "source": "./claude-plugin",
+      "description": "Publish Markdown and HTML files to Confluence Cloud."
+    }
+  ]
+}

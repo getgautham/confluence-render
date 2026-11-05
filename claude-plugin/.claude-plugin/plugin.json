@@ -1,0 +1,47 @@
+{
+  "name": "confluence-render",
+  "displayName": "Confluence: Markdown & HTML",
+  "version": "0.1.0",
+  "description": "Publish Markdown and HTML files to Confluence Cloud as real pages, shown in full by the open-source Markdown & HTML file macro.",
+  "author": {
+    "name": "Gautham S"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/getgautham/confluence-render",
+  "repository": "https://github.com/getgautham/confluence-render",
+  "keywords": [
+    "confluence",
+    "markdown",
+    "html",
+    "atlassian",
+    "publish"
+  ],
+  "userConfig": {
+    "site": {
+      "type": "string",
+      "title": "Confluence site",
+      "description": "Your site address, like yourcompany.atlassian.net",
+      "required": true
+    },
+    "email": {
+      "type": "string",
+      "title": "Atlassian email",
+      "description": "The email you log in to Confluence with",
+      "required": true
+    },
+    "api_token": {
+      "type": "string",
+      "title": "Atlassian API token",
+      "description": "Make one at id.atlassian.com/manage-profile/security/api-tokens. Use a scoped token with only the scopes in the README. Stored in your system keychain.",
+      "required": true,
+      "sensitive": true
+    },
+    "macro_key": {
+      "type": "string",
+      "title": "Macro key",
+      "description": "Leave as is unless you deployed your own copy of the Confluence app. Then open its macro settings in Confluence and copy 'Key for the Claude plugin'.",
+      "required": true,
+      "default": "8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e/4760d118-07f7-4e19-b112-1fe62b7f66b4/static/render-file"
+    }
+  }
+}
