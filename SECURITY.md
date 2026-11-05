@@ -9,6 +9,6 @@ Found a way for a file to break out of the macro's sandbox, read something it sh
 - File content is only ever shown inside a sandboxed iframe, never in the app's own page.
 - HTML scripts run only on the exact attachment (id and version) an editor allowed; a newer upload or a same-name replacement runs with scripts off.
 - The Claude plugin sends your token only to your `*.atlassian.net` site or `api.atlassian.com`, and never logs it.
-- The plugin only reads `.md` / `.html` files (after resolving symlinks) and never deletes anything.
+- The plugin only reads `.md` / `.html` files, and the images they point at inside their own folder (after resolving symlinks). It never deletes anything.
 
 If the code doesn't keep one of these, that's a bug worth reporting.

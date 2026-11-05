@@ -1,7 +1,7 @@
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, writeFileSync, readFileSync, existsSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -18,6 +18,20 @@ before(() => {
   writeFileSync(files.txt, 'secret');
   files.sneaky = join(dir, 'sneaky.md');
   symlinkSync(files.txt, files.sneaky);
+
+  const site = join(dir, 'site');
+  mkdirSync(join(site, 'img'), { recursive: true });
+  writeFileSync(join(site, 'chart.png'), 'png');
+  writeFileSync(join(site, 'img', 'logo.svg'), '<svg/>');
+  writeFileSync(join(dir, 'outside.png'), 'private');
+  symlinkSync(files.txt, join(site, 'leak.png'));
+  files.withImages = join(site, 'report.md');
+  writeFileSync(
+    files.withImages,
+    '![Revenue](chart.png)\n<img alt="Logo" src="img/logo.svg">\n![again](./chart.png)\n' +
+      '![up](../outside.png) ![abs](' + join(dir, 'outside.png') + ') ![gone](missing.png) ![leak](leak.png)\n' +
+      '![web](https://example.com/a.png) ![inline](data:image/png;base64,AAAA)\n',
+  );
 });
 
 // Runs the server, sends JSON-RPC calls, returns { replies, requests } (requests = what hit "Confluence").
@@ -152,4 +166,14 @@ test('not set up: says what is missing, sends nothing', async () => {
   assert.equal(replies[0].result.isError, true);
   assert.match(text(replies[0]), /site .*macro key/);
   assert.equal(requests.length, 0);
+});
+
+test('uploads the images the file points at, from its own folder only, before the file', async () => {
+  const { replies, requests } = await run([call('publish_file', { path: files.withImages, page_id: '456' })]);
+  const out = JSON.parse(text(replies[0]));
+  assert.deepEqual(out.images, ['chart.png', 'logo.svg']);
+  assert.equal(out.images_skipped.length, 4, out.images_skipped.join('; ')); // ../outside, absolute outside, missing, symlink to .txt
+  const ups = requests.filter((r) => r.url.endsWith('/child/attachment')).map((r) => r.body.fileName);
+  assert.deepEqual(ups, ['chart.png', 'logo.svg', 'report.md']);
+  assert.ok(requests.every((r) => new URL(r.url).host === 'acme.atlassian.net'), 'only talks to the site');
 });

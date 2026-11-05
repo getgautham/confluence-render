@@ -4,7 +4,7 @@
 import { createInterface } from 'node:readline';
 import { readConfig, client, listSpaces, publish, UserError } from './confluence.mjs';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 const TOOLS = [
   {
@@ -19,7 +19,8 @@ const TOOLS = [
     name: 'publish_file',
     description:
       'Put a local .md or .html file on a Confluence page, shown in full by the "Markdown & HTML file" macro. ' +
-      'Give space_key to make a new page, or page_id to add the file to an existing page (publishing the same file name again replaces it with the new version).',
+      'Give space_key to make a new page, or page_id to add the file to an existing page (publishing the same file name again replaces it with the new version). ' +
+      'Images the file points at by relative path (![](chart.png), <img src="chart.png">) in its own folder are uploaded with it: PNG, JPG, GIF, WebP or SVG, 3 MB each.',
     inputSchema: {
       type: 'object',
       properties: {

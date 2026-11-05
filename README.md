@@ -26,7 +26,7 @@ You can use the Confluence app on its own. The Claude plugin needs the app.
 - Your API token lives in your system keychain, not in a file.
 - Acts as you, with your Confluence permissions. Use a scoped token so it can do only what it needs (below).
 - Talks only to your `*.atlassian.net` site (or Atlassian's API gateway for scoped tokens).
-- Reads only `.md`, `.markdown`, `.html` and `.htm` files under 2 MB, and checks where symlinks really point.
+- Reads only `.md`, `.markdown`, `.html` and `.htm` files under 2 MB, plus the images they point at inside their own folder (PNG, JPG, GIF, WebP, SVG, 3 MB each). It checks where symlinks really point.
 - Two tools: list spaces, publish a file. It never deletes.
 
 See [PRIVACY.md](PRIVACY.md) for what happens to your data, and [SECURITY.md](SECURITY.md) to report a problem.
@@ -48,7 +48,9 @@ forge install -e production --product confluence --site yourcompany.atlassian.ne
 
 **Use it:** drag a `.md` or `.html` file onto a page, type `/Markdown & HTML file`, pick the file in the settings, publish. With no file picked, it shows the newest `.md` or `.html` on the page.
 
-Tip: make HTML files self-contained (inline CSS and JS, images as `data:` URIs). The app makes no outside calls, so CDN scripts, web fonts and remote images won't load.
+Images: attach them to the same page and point to them by name, `![Revenue](revenue.png)` or `<img src="img/revenue.png">` (the folder part is ignored). The Claude plugin uploads them for you. `data:` images work too.
+
+Tip: make HTML files self-contained (inline CSS and JS). The app makes no outside calls, so CDN scripts, web fonts and images from the web won't load.
 
 ## 2. Install the Claude plugin (each person, or pushed by an admin)
 
@@ -74,7 +76,7 @@ Then just ask: *"Write up the Q3 launch notes and put them in the ENG space."* C
 
 ## Try it
 
-[`examples/`](examples) has three files to publish: a Markdown playbook, a static HTML one-pager, and an interactive HTML dashboard (needs `run_scripts`).
+[`examples/`](examples) has three files to publish: a Markdown playbook with a chart image, a static HTML one-pager, and an interactive HTML dashboard (needs `run_scripts`).
 
 ## Develop
 
@@ -89,7 +91,7 @@ claude plugin validate ./claude-plugin
 ## Limits
 
 - Confluence Cloud only (Forge). Not Server or Data Center.
-- Files up to 2 MB.
+- Files up to 2 MB; images up to 3 MB each. Images from the web don't load.
 - On a brand-new page, the file shows once the page is published for the first time (Confluence keeps a new page's files private until then).
 - Text inside the macro isn't found by Confluence search. The file itself still is, as an attachment.
 - The Claude plugin starts a small local Node program, so it needs Claude Code (or a Claude app that runs local plugins), not claude.ai in a browser.

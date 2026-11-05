@@ -1,5 +1,7 @@
 How we find stores that should stock us, reach them, and turn a reply into a first order.
 
+![New stockists by month, April to September: 6, 9, 12, 15, 20, 25](stockists-by-month.svg)
+
 ## Who we sell to
 
 | Store type | Why they buy | First order |

@@ -1,5 +1,6 @@
 import { invoke, view } from '@forge/bridge';
 import { buildSrcdoc, measureHeight } from './doc.js';
+import { imageRefs, swapImages } from '../../src/files.js';
 
 const root = document.getElementById('root');
 const MAX_HEIGHT = 50000;
@@ -39,7 +40,7 @@ function themeColours() {
   };
 }
 
-function mount(file) {
+function mount(file, srcdoc) {
   const scripts = file.scripts === 'on';
   const frame = document.createElement('iframe');
   frame.title = file.name;
@@ -72,12 +73,22 @@ function mount(file) {
     });
   }
 
-  frame.srcdoc = buildSrcdoc({ kind: file.kind, text: file.text, scripts, theme: themeColours() });
+  frame.srcdoc = srcdoc;
   root.replaceChildren(frame);
   if (file.scripts === 'stale') {
     note('This file changed since its scripts were allowed, so they are off. An editor can allow them again in the macro settings.');
     root.append(frame);
   }
+}
+
+// Images the file points at that are attached to this page ("chart.png"):
+// fetched as the viewer and put inline, since the frame can't reach Confluence.
+async function withImages(html, attached) {
+  const names = imageRefs(html, attached);
+  if (!names.length) return html;
+  const got = await Promise.all(names.map((name) => invoke('getImage', { name }).catch(() => ({}))));
+  const src = Object.fromEntries(names.map((n, i) => [n, got[i]?.src]));
+  return swapImages(html, (n) => (typeof src[n] === 'string' && src[n].startsWith('data:image/') ? src[n] : null));
 }
 
 async function main() {
@@ -91,7 +102,8 @@ async function main() {
     attachment: config.attachment,
   });
   if (r.error) return note((MESSAGES[r.error] ?? MESSAGES.confluence)(r));
-  mount(r);
+  const html = buildSrcdoc({ kind: r.kind, text: r.text, scripts: r.scripts === 'on', theme: themeColours() });
+  mount(r, await withImages(html, r.images ?? []));
 }
 
 main().catch(() => note("Couldn't load the file. Refresh the page to try again."));

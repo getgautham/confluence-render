@@ -1,11 +1,14 @@
 // Talks to one Confluence Cloud site as one person (their email + API token).
 // No dependencies: Node's own fetch, FormData and Blob.
 import { readFile, realpath, stat } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { basename, dirname, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
 export const MAX_BYTES = 2 * 1024 * 1024; // same cap as the Confluence macro
+export const MAX_IMAGE_BYTES = 3 * 1024 * 1024; // the macro's cap per image
 const RENDERABLE = /\.(md|markdown|html|htm)$/i;
+const IMAGE = /\.(png|jpe?g|gif|webp|svg)$/i;
+const IMAGE_REF = /!\[[^\]]*\]\(\s*<?([^)\s>]+)|<img\b[^>]*?\ssrc\s*=\s*["']?([^"'\s>]+)/gi;
 const SITE = /^[a-z0-9][a-z0-9-]*\.atlassian\.net$/;
 const KEY = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/static\/render-file$/;
 const MACRO_TITLE = 'Markdown & HTML file';
@@ -78,7 +81,41 @@ export async function loadFile(path) {
   const info = await stat(real);
   if (!info.isFile()) throw new UserError(`${path} is not a file.`);
   if (info.size > MAX_BYTES) throw new UserError(`${basename(path)} is over 2 MB. Split it into smaller files.`);
-  return { name: basename(path), bytes: await readFile(real) };
+  return { name: basename(path), dir: dirname(real), bytes: await readFile(real) };
+}
+
+// Images the file points at by relative path (![](chart.png), <img src="img/chart.png">).
+// Read from the file's own folder only, so a file can't pull in a picture from elsewhere
+// on disk. Uploaded beside the file under their own name; the macro shows them inline.
+export async function loadImages(file) {
+  const found = new Map(); // name -> real path
+  const skipped = [];
+  for (const m of file.bytes.toString('utf8').matchAll(IMAGE_REF)) {
+    const ref = m[1] ?? m[2];
+    if (/^([a-z][a-z0-9+.-]*:|\/\/)/i.test(ref)) continue; // web links and data: stay as they are
+    let path = ref.split(/[?#]/)[0];
+    try {
+      path = decodeURIComponent(path);
+    } catch {}
+    const name = basename(path);
+    if (!IMAGE.test(name)) continue;
+    let real = null;
+    try {
+      real = await realpath(resolve(file.dir, path));
+    } catch {}
+    if (!real || !real.startsWith(file.dir + sep) || !IMAGE.test(real) || !(await stat(real)).isFile()) {
+      skipped.push(`${ref}: not an image in the file's folder`);
+    } else if (found.has(name)) {
+      if (found.get(name) !== real) skipped.push(`${ref}: another image is also called ${name}`);
+    } else if ((await stat(real)).size > MAX_IMAGE_BYTES) {
+      skipped.push(`${ref}: over 3 MB`);
+    } else {
+      found.set(name, real);
+    }
+  }
+  const images = [];
+  for (const [name, real] of found) images.push({ name, bytes: await readFile(real) });
+  return { images, skipped };
 }
 
 export function client(cfg, fetchImpl = fetch) {
@@ -175,12 +212,19 @@ async function placeMacro(api, cfg, pageId, name, scripts, att) {
 export async function publish(api, cfg, args) {
   const file = await loadFile(args.path);
   const scripts = args.run_scripts === true && /\.html?$/i.test(file.name);
+  const { images, skipped } = await loadImages(file);
+  const extra = { ...(images.length ? { images: images.map((i) => i.name) } : {}), ...(skipped.length ? { images_skipped: skipped } : {}) };
+  // Images go up first, so the page never shows the file with its pictures missing.
+  const uploadAll = async (pageId) => {
+    for (const img of images) await upload(api, pageId, img);
+    return upload(api, pageId, file);
+  };
 
   if (args.page_id) {
     const pageId = String(args.page_id);
-    const att = await upload(api, pageId, file);
+    const att = await uploadAll(pageId);
     const page = await placeMacro(api, cfg, pageId, file.name, scripts, att);
-    return { url: api.siteUrl + (page._links?.webui ?? `/pages/${pageId}`), file: file.name, updated: true };
+    return { url: api.siteUrl + (page._links?.webui ?? `/pages/${pageId}`), file: file.name, updated: true, ...extra };
   }
 
   if (!args.space_key) throw new UserError('Give a space_key for a new page, or a page_id to update one.');
@@ -201,10 +245,10 @@ export async function publish(api, cfg, args) {
   });
   const url = api.siteUrl + (page._links?.webui ?? `/pages/${page.id}`);
   try {
-    const att = await upload(api, page.id, file);
+    const att = await uploadAll(page.id);
     if (scripts) await placeMacro(api, cfg, page.id, file.name, true, att);
   } catch (e) {
     throw new UserError(`Made the page (${url}) but didn't finish. ${e.message} Run again with page_id ${page.id}.`);
   }
-  return { url, file: file.name, page_id: page.id, created: true };
+  return { url, file: file.name, page_id: page.id, created: true, ...extra };
 }
