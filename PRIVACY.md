@@ -1,6 +1,6 @@
 # Privacy
 
-**The Confluence app** (Markdown & HTML file macro)
+**The Confluence app** (Render MD & HTML macro)
 
 - Stores nothing. No database, no logs of your content, no cookies.
 - Sends nothing outside Atlassian. It runs on Atlassian's own platform (Forge, "Runs on Atlassian" eligible) and makes no outside network calls.

@@ -13,7 +13,7 @@ const SITE = /^[a-z0-9][a-z0-9-]*\.atlassian\.net$/;
 const KEY = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/static\/render-file$/;
 // The public Confluence app's macro. Used when the setting is left empty.
 export const DEFAULT_MACRO_KEY = '8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e/4760d118-07f7-4e19-b112-1fe62b7f66b4/static/render-file';
-const MACRO_TITLE = 'Markdown & HTML file';
+const MACRO_TITLE = 'Render MD & HTML';
 
 export class UserError extends Error {}
 

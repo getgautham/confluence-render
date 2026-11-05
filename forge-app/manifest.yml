@@ -4,11 +4,11 @@ modules:
       resource: render
       resolver:
         function: resolver
-      title: Markdown & HTML file
+      title: Render MD & HTML
       description: Show a .md or .html file attached to this page.
       config:
         resource: config
-        title: Markdown & HTML file
+        title: Render MD & HTML
   function:
     - key: resolver
       handler: index.handler

@@ -1,4 +1,4 @@
-# Confluence: Markdown & HTML
+# Render MD & HTML for Confluence
 
 Ask Claude for a doc, report or dashboard. It publishes it to Confluence, and your team sees it in full: tables, charts, images, even working tabs and buttons.
 
@@ -17,7 +17,7 @@ A site admin does this once per site.
 
 Pick your site, then Install. It asks only to read pages and attachments.
 
-Already done? In any Confluence page, type `/Markdown`. If you see **Markdown & HTML file**, skip this step.
+Already done? In any Confluence page, type `/Render`. If you see **Render MD & HTML**, skip this step.
 
 ### 2. Add the plugin to Claude Code
 
@@ -51,7 +51,7 @@ Ask Claude:
 
 Claude writes the file, publishes it and sends you the link. To change it later, ask: *"Add September to that page."*
 
-No Claude? Drag a `.md` or `.html` file onto a page, type `/Markdown & HTML file`, then publish.
+No Claude? Drag a `.md` or `.html` file onto a page, type `/Render MD & HTML`, then publish.
 
 ## What shows
 

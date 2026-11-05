@@ -1,8 +1,8 @@
 {
   "name": "confluence-render",
-  "displayName": "Confluence: Markdown & HTML",
+  "displayName": "Render MD & HTML for Confluence",
   "version": "0.3.1",
-  "description": "Publish Markdown and HTML files to Confluence Cloud as real pages, shown in full by the open-source Markdown & HTML file macro.",
+  "description": "Publish Markdown and HTML files to Confluence Cloud as real pages, shown in full by the open-source Render MD & HTML macro.",
   "author": {
     "name": "Gautham S"
   },

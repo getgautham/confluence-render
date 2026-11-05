@@ -10,16 +10,16 @@ Everything the Atlassian Marketplace form asks for. Copy each field as is; the i
    - Set up billing. Atlassian requires it to publish a developer space.
    - **Make public on Marketplace** → accept the Marketplace Partner Agreement.
 3. Sign in once at [community.developer.atlassian.com](https://community.developer.atlassian.com). The partner profile needs one contact there.
-4. Go to [marketplace.atlassian.com/manage/apps/create](https://marketplace.atlassian.com/manage/apps/create), pick the vendor, pick the Forge app **Markdown and HTML file**, choose **Free**, and fill in the fields below.
+4. Go to [marketplace.atlassian.com/manage/apps/create](https://marketplace.atlassian.com/manage/apps/create), pick the vendor, pick the Forge app **Render MD & HTML for Confluence**, choose **Free**, and fill in the fields below.
 5. Atlassian reviews in about 1 to 3 weeks. Once it's live, replace the install link in the README with the Marketplace link.
 
 ## Listing
 
 **App name** (60 max)
-Markdown & HTML for Confluence
+Render MD & HTML for Confluence
 
 **Tagline** (130 max)
-Show Markdown and HTML files in full on any Confluence page. Let Claude write and publish them for you.
+Publish Claude's docs and dashboards to Confluence, in full. Or attach any .md or .html file and it shows as written.
 
 **Summary** (250 max)
 Attach a .md or .html file to a page and the macro shows it in full: tables, code, checklists, images and your own layouts. Interactive HTML runs in a locked sandbox, only when an editor allows it.
@@ -27,7 +27,7 @@ Attach a .md or .html file to a page and the macro shows it in full: tables, cod
 **More details** (1000 max)
 Teams write in Markdown and build reports in HTML. This macro shows those files in Confluence the way they were meant to look.
 
-Drag a .md or .html file onto a page, add the Markdown & HTML file macro, and publish. Markdown gets clean, Confluence-styled tables, code, quotes, checklists and images. HTML keeps its own fonts, colours and layout, and the frame sizes itself to the content.
+Drag a .md or .html file onto a page, add the Render MD & HTML macro, and publish. Markdown gets clean, Confluence-styled tables, code, quotes, checklists and images. HTML keeps its own fonts, colours and layout, and the frame sizes itself to the content.
 
 Charts, tabs and filters can run too. Scripts are off until an editor allows them, and the approval holds only for that exact upload. They run in a sandbox with no access to Confluence, the page or anyone's login.
 

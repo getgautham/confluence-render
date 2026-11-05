@@ -18,7 +18,7 @@ const TOOLS = [
   {
     name: 'publish_file',
     description:
-      'Put a local .md or .html file on a Confluence page, shown in full by the "Markdown & HTML file" macro. ' +
+      'Put a local .md or .html file on a Confluence page, shown in full by the "Render MD & HTML" macro. ' +
       'Give space_key to make a new page, or page_id to add the file to an existing page (publishing the same file name again replaces it with the new version). ' +
       'Images the file points at by relative path (![](chart.png), <img src="chart.png">) in its own folder are uploaded with it: PNG, JPG, GIF, WebP or SVG, 3 MB each.',
     inputSchema: {
