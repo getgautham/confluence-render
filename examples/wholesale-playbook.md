@@ -1,5 +1,3 @@
-# Wholesale outreach playbook
-
 How we find stores that should stock us, reach them, and turn a reply into a first order.
 
 ## Who we sell to

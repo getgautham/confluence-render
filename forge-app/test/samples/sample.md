@@ -21,6 +21,11 @@ const total = items.reduce((sum, i) => sum + i.price, 0);
 
 Inline `code`, ~~struck~~, and a rule:
 
+## Checklist
+
+- [x] Done item
+- [ ] Open item
+
 ---
 
 <p id="xss-check">Safe raw HTML stays.</p>

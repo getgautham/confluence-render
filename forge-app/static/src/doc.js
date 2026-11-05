@@ -6,8 +6,12 @@ import DOMPurify from 'dompurify';
 
 const md = new MarkdownIt({ html: true, linkify: true });
 
+// "- [ ] item" and "- [x] item" show as checkboxes, as they do on GitHub.
+const TASK = /<li>(<p>)?\[([ xX])\]\s/g;
+
 export function mdToHtml(text) {
-  return DOMPurify.sanitize(md.render(text));
+  const html = md.render(text).replace(TASK, (_, p = '', mark) => `<li class="task">${p}<input type="checkbox" disabled${mark === ' ' ? '' : ' checked'}> `);
+  return DOMPurify.sanitize(html);
 }
 
 // Height of the file's content. documentElement.scrollHeight never drops below the
@@ -53,7 +57,8 @@ blockquote{border-left:2px solid ${t.border};padding-left:14px;color:${t.subtle}
 table{border-collapse:collapse;display:block;overflow:auto}
 th,td{border:1px solid ${t.border};padding:6px 10px;text-align:left;vertical-align:top}
 th{background:${t.codeBg};font-weight:600}
-hr{border:0;border-top:1px solid ${t.border};margin:1.5em 0}`;
+hr{border:0;border-top:1px solid ${t.border};margin:1.5em 0}
+.task{list-style:none}.task input{margin:0 .45em 0 -1.4em;vertical-align:-.1em}`;
 }
 
 export function buildSrcdoc({ kind, text, scripts, theme }) {
