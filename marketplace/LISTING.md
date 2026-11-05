@@ -5,7 +5,7 @@ Everything the Atlassian Marketplace form asks for. Copy each field as is; the i
 ## Before you submit
 
 1. **Install links stop working once you submit.** Anyone who needs the current link should install first.
-2. In the [developer console](https://developer.atlassian.com/console/myapps/), open the **Synchronise** developer space, then **Settings**:
+2. Open the developer space's own Settings (not the app's Distribution page): developer console → the space name in the breadcrumb → **Settings** in the left menu, or [this link](https://developer.atlassian.com/console/developer-space/5eb40340-0de0-460a-8c68-1fdb42497c5e/settings).
    - Name it **Synchronise AI**. It becomes the public partner name, and the banner shows it.
    - Set up billing. Atlassian requires it to publish a developer space.
    - **Make public on Marketplace** → accept the Marketplace Partner Agreement.
