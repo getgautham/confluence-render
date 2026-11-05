@@ -4,7 +4,7 @@ Everything the Atlassian Marketplace form asks for. Copy each field as is; the i
 
 ## Before you submit
 
-1. **Install links stop working once you submit.** Anyone who needs the current link should install first.
+1. The direct install link in the README still worked after submitting. Swap it for the Marketplace link once the listing is approved.
 2. Open the developer space's own Settings (not the app's Distribution page): developer console → the space name in the breadcrumb → **Settings** in the left menu, or [this link](https://developer.atlassian.com/console/developer-space/5eb40340-0de0-460a-8c68-1fdb42497c5e/settings).
    - Name it **Synchronise AI**. It becomes the public partner name, and the banner shows it.
    - Set up billing. Atlassian requires it to publish a developer space.
@@ -50,7 +50,7 @@ Optional: the free, open-source Claude Code plugin writes the file and publishes
 - Summary: Designed HTML pages keep their own fonts, colours and layout. The frame fits the content, with no inner scrollbars.
 - Caption: A static HTML one-pager, exactly as designed.
 
-**Logo:** `logo-144.png` · **Banner:** `banner-1120x548.png`
+**Logo:** `logo-144.png` · **Hero** (page design "Hero & highlights"): `hero-960x600.png` · **Banner:** `banner-1120x548.png`
 
 **Release summary** (80 max)
 First release: Markdown and HTML files, images, sandboxed scripts.
@@ -63,7 +63,8 @@ First release: Markdown and HTML files, images, sandboxed scripts.
 | Privacy policy | https://github.com/getgautham/confluence-render/blob/main/PRIVACY.md |
 | Support | https://github.com/getgautham/confluence-render/issues |
 | Source code | https://github.com/getgautham/confluence-render |
-| End user terms | Use Atlassian's standard customer agreement |
+| License | BSD (the form has no MIT; BSD is the closest). Source code license: https://github.com/getgautham/confluence-render/blob/main/LICENSE |
+| End user terms | Use the standard agreement (Bonterms Standard EULA): Yes |
 
 ## Reviewer details
 

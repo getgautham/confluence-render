@@ -7,6 +7,7 @@ shot() { "$CHROME" --headless=new --hide-scrollbars --force-device-scale-factor=
   --window-size="$2" --screenshot="$PWD/$1" "$SRC/$3" >/dev/null 2>&1; }
 shot logo-144.png 144,144 logo.html
 shot banner-1120x548.png 1120,548 banner.html
+shot hero-960x600.png 960,600 hero.html
 # Highlights: 1840x900, plus the 580x330 crop. Source shots are already cropped below Confluence's top bar; the author byline was hidden.
 shot highlight-1-markdown.png 1840,900 "highlight.html?shot=shot-markdown.jpg&x=195&y=0&w=1090&h=708&W=1840&H=900"
 shot highlight-1-markdown-crop.png 580,330 "highlight.html?shot=shot-markdown.jpg&x=360&y=226&w=725&h=412&s=0.8&W=580&H=330&pad=-1"
