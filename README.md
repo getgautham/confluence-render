@@ -18,7 +18,7 @@ You can use the Confluence app on its own. The Claude plugin needs the app.
 - Runs on Atlassian's own platform (Forge). No server of ours, no outside network calls, nothing stored.
 - Reads files **as the person viewing the page**. If they can't open the attachment in Confluence, they can't see it here.
 - Asks for read-only access: pages and attachments. It can't edit or delete anything.
-- Every file is shown inside a sandboxed frame. Markdown is cleaned (DOMPurify) and can't run code. HTML can't run code either, unless the page author ticks **Let this HTML run its scripts**. Even then the code runs in a locked box: it can't see Confluence, the page around it, or anyone's login.
+- Every file is shown inside a sandboxed frame. Markdown is cleaned (DOMPurify) and can't run code. HTML can't run code either, unless the page author ticks **Let this HTML run its scripts**. Even then the code runs in a locked box: it can't see Confluence, the page around it, or anyone's login. And scripts run only on the exact file version an editor allowed. If anyone uploads a new version, it shows with scripts off until an editor allows them again.
 
 **The Claude plugin**
 

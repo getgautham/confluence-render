@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { kindOf, pickFile } from '../src/files.js';
+import { kindOf, pickFile, scriptsState } from '../src/files.js';
 
 test('kindOf', () => {
   assert.equal(kindOf('notes.md'), 'md');
@@ -20,4 +20,13 @@ test('pickFile: named file wins, missing name is null, default is newest', () =>
   assert.equal(pickFile(files, 'gone.md'), null);
   assert.equal(pickFile(files, null).name, 'new.html');
   assert.equal(pickFile([], null), null);
+});
+
+test('scriptsState: on only for the exact named html file and version', () => {
+  const file = { name: 'chart.html', version: 3 };
+  assert.equal(scriptsState({ file: 'chart.html', scripts: true, version: 3 }, file), 'on');
+  assert.equal(scriptsState({ file: 'chart.html', scripts: true, version: 2 }, file), 'stale', 'new upload');
+  assert.equal(scriptsState({ file: null, scripts: true, version: 3 }, file), 'stale', 'newest mode');
+  assert.equal(scriptsState({ file: 'chart.html', scripts: false, version: 3 }, file), 'off');
+  assert.equal(scriptsState({ file: 'notes.md', scripts: true, version: 1 }, { name: 'notes.md', version: 1 }), 'off');
 });

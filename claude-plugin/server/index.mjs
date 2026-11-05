@@ -30,7 +30,9 @@ const TOOLS = [
         page_id: { type: 'string', description: 'Existing page to add or update the file on.' },
         run_scripts: {
           type: 'boolean',
-          description: 'HTML only. Let the file run its JavaScript, in a sandbox with no access to Confluence. Only when the page needs it (charts, tabs).',
+          description:
+            'HTML only. Let the file run its JavaScript, in a sandbox with no access to Confluence. Only when the page needs it (charts, tabs). ' +
+            'Pass it again on every update: a new version runs scripts only when this is set.',
         },
       },
       required: ['path'],

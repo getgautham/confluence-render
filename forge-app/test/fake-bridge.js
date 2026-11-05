@@ -12,14 +12,15 @@ export const view = {
       }
     },
   },
-  getContext: async () => ({ extension: { config: { file, scripts: q.get('scripts') === '1' } } }),
+  getContext: async () => ({ extension: { config: { file, scripts: q.get('scripts') === '1', version: 1 } } }),
   submit: async (p) => console.log('submit', JSON.stringify(p)),
   close: async () => console.log('close'),
 };
 
 export async function invoke(name) {
-  if (name === 'listFiles') return { files: [{ name: 'sample.md' }, { name: 'sample.html' }] };
+  if (name === 'listFiles') return { files: [{ name: 'sample.md', version: 1 }, { name: 'sample.html', version: 1 }] };
   if (name === 'extensionKey') return '00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111/static/render-file';
   const text = await (await fetch(`../samples/${file}`)).text();
-  return { name: file, kind: file.endsWith('.md') ? 'md' : 'html', text };
+  const scripts = q.get('scripts') === '1' ? (q.get('stale') ? 'stale' : 'on') : 'off';
+  return { name: file, kind: file.endsWith('.md') ? 'md' : 'html', text, scripts };
 }

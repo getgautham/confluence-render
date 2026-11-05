@@ -1,6 +1,6 @@
 import Resolver from '@forge/resolver';
 import api, { route, getAppContext } from '@forge/api';
-import { kindOf, pickFile, MAX_BYTES, MACRO_KEY } from './files.js';
+import { kindOf, pickFile, scriptsState, MAX_BYTES, MACRO_KEY } from './files.js';
 
 // Every Confluence call runs as the person viewing the page (asUser), so they
 // only ever see files their own Confluence permissions already allow.
@@ -22,7 +22,13 @@ async function listFiles(pageId) {
   const { results = [] } = await res.json();
   return results
     .filter((a) => kindOf(a.title))
-    .map((a) => ({ id: a.id, name: a.title, size: a.fileSize, updated: a.version?.createdAt ?? '' }));
+    .map((a) => ({
+      id: a.id,
+      name: a.title,
+      size: a.fileSize,
+      version: a.version?.number ?? null,
+      updated: a.version?.createdAt ?? '',
+    }));
 }
 
 function pageIdOf(context) {
@@ -54,7 +60,12 @@ resolver.define('getFile', async ({ context, payload }) => {
       .asUser()
       .requestConfluence(route`/wiki/rest/api/content/${pageId}/child/attachment/${file.id}/download`);
     if (!res.ok) throw new HttpError(res.status);
-    return { name: file.name, kind: kindOf(file.name), text: await res.text() };
+    return {
+      name: file.name,
+      kind: kindOf(file.name),
+      text: await res.text(),
+      scripts: scriptsState({ file: wanted, scripts: payload?.scripts, version: payload?.version }, file),
+    };
   } catch (e) {
     return { error: 'confluence', status: e.status ?? null };
   }

@@ -32,9 +32,9 @@ async function main() {
   select.value = config.file ?? '';
   scripts.checked = config.scripts === true;
 
+  // Scripts only for one named HTML file, never for "newest".
   const syncScripts = () => {
-    const name = select.value || r.files?.[0]?.name || '';
-    $('scripts-row').hidden = /\.(md|markdown)$/i.test(name);
+    $('scripts-row').hidden = !/\.html?$/i.test(select.value);
   };
   select.addEventListener('change', syncScripts);
   syncScripts();
@@ -48,7 +48,10 @@ async function main() {
   $('save').addEventListener('click', async () => {
     $('save').disabled = true;
     try {
-      await view.submit({ config: { file: select.value, scripts: scripts.checked } });
+      const picked = (r.files ?? []).find((f) => f.name === select.value);
+      const allow = scripts.checked && !$('scripts-row').hidden && !!picked;
+      // Pin scripts to the version on screen now; a later upload runs without them.
+      await view.submit({ config: { file: select.value, scripts: allow, version: allow ? picked.version : null } });
     } catch {
       $('status').textContent = "Couldn't save. Try again.";
       $('save').disabled = false;

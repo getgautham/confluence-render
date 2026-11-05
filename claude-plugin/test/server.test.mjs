@@ -83,7 +83,7 @@ test('new page: creates the page with the macro, then uploads the file', async (
   const node = JSON.parse(create.body.body.value).content[0];
   assert.equal(node.attrs.extensionKey, KEY);
   assert.equal(node.attrs.extensionType, 'com.atlassian.ecosystem');
-  assert.deepEqual(node.attrs.parameters.guestParams, { file: 'report.html', scripts: true });
+  assert.deepEqual(node.attrs.parameters.guestParams, { file: 'report.html', scripts: true, version: 1 });
 
   const up = requests.find((r) => r.url.endsWith('/rest/api/content/123/child/attachment'));
   assert.equal(up.method, 'PUT');
@@ -108,6 +108,18 @@ test('existing page: uploads, then appends the macro once', async () => {
   const again = await run([call('publish_file', { path: files.md, page_id: '456' })], { MOCK_EXISTING_ADF: adf });
   assert.ok(!again.requests.some((r) => r.method === 'PUT' && r.url.endsWith('/api/v2/pages/456')), 'no second macro');
   assert.ok(again.requests.some((r) => r.url.endsWith('/child/attachment')), 'new file version uploaded');
+});
+
+test('existing page with scripts: re-pins the macro to the new upload', async () => {
+  const old = { type: 'doc', version: 1, content: [{ type: 'extension', attrs: { extensionKey: KEY, parameters: { guestParams: { file: 'report.html', scripts: true, version: 2 } } } }] };
+  const env = { MOCK_EXISTING_ADF: JSON.stringify(old), MOCK_ATT_VERSION: '3' };
+  const { requests } = await run([call('publish_file', { path: files.html, page_id: '456', run_scripts: true })], env);
+  const put = requests.find((r) => r.method === 'PUT' && r.url.endsWith('/api/v2/pages/456'));
+  const gp = JSON.parse(put.body.body.value).content[0].attrs.parameters.guestParams;
+  assert.deepEqual(gp, { file: 'report.html', scripts: true, version: 3 });
+
+  const without = await run([call('publish_file', { path: files.html, page_id: '456' })], env);
+  assert.ok(!without.requests.some((r) => r.method === 'PUT' && r.url.endsWith('/api/v2/pages/456')), 'no re-pin without run_scripts');
 });
 
 test('refuses non-md/html files and symlinks that point at them', async () => {

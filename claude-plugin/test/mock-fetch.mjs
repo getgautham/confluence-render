@@ -28,7 +28,9 @@ globalThis.fetch = async (url, init = {}) => {
     return json({ results: keys ? all.filter((s) => s.key === keys) : all });
   }
   if (method === 'POST' && p === '/api/v2/pages') return json({ id: '123', title: body.title, _links: { webui: '/spaces/ENG/pages/123' } });
-  if (method === 'PUT' && /^\/rest\/api\/content\/\d+\/child\/attachment$/.test(p)) return json({ results: [{ id: 'att1' }] });
+  if (method === 'PUT' && /^\/rest\/api\/content\/\d+\/child\/attachment$/.test(p)) {
+    return json({ results: [{ id: 'att1', version: { number: Number(process.env.MOCK_ATT_VERSION ?? 1) } }] });
+  }
   if (method === 'GET' && /^\/api\/v2\/pages\/\d+$/.test(p)) {
     return json({
       id: '456',

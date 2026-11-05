@@ -38,7 +38,8 @@ function themeColours() {
   };
 }
 
-function mount(file, scripts) {
+function mount(file) {
+  const scripts = file.scripts === 'on';
   const frame = document.createElement('iframe');
   frame.title = file.name;
   // Scripts on: no same-origin, so the file's code can't reach this frame or Confluence.
@@ -72,15 +73,19 @@ function mount(file, scripts) {
 
   frame.srcdoc = buildSrcdoc({ kind: file.kind, text: file.text, scripts, theme: themeColours() });
   root.replaceChildren(frame);
+  if (file.scripts === 'stale') {
+    note('This file changed since its scripts were allowed, so they are off. An editor can allow them again in the macro settings.');
+    root.append(frame);
+  }
 }
 
 async function main() {
   await view.theme.enable();
   const ctx = await view.getContext();
   const config = ctx.extension?.config ?? {};
-  const r = await invoke('getFile', { file: config.file || null });
+  const r = await invoke('getFile', { file: config.file || null, scripts: config.scripts, version: config.version });
   if (r.error) return note((MESSAGES[r.error] ?? MESSAGES.confluence)(r));
-  mount(r, r.kind === 'html' && config.scripts === true);
+  mount(r);
 }
 
 main().catch(() => note("Couldn't load the file. Refresh the page to try again."));
