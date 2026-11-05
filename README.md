@@ -72,6 +72,10 @@ Then just ask: *"Write up the Q3 launch notes and put them in the ENG space."* C
 
 **Claude Enterprise / Team:** an admin can add this repo as a plugin marketplace and turn the plugin on for the whole org, so people only enter their own token. See [Distribute plugins to your organization](https://claude.com/docs/plugins/org-sync).
 
+## Try it
+
+[`examples/`](examples) has three files to publish: a Markdown playbook, a static HTML one-pager, and an interactive HTML dashboard (needs `run_scripts`).
+
 ## Develop
 
 ```bash

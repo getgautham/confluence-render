@@ -4,7 +4,7 @@
 import { createInterface } from 'node:readline';
 import { readConfig, client, listSpaces, publish, UserError } from './confluence.mjs';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 const TOOLS = [
   {
