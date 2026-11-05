@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;overflow:hidden;background:#1d2433}
+.card{position:absolute;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.card img{position:absolute;display:block}
+</style></head><body><div class="card"><img id="i"></div>
+<script>
+// ?shot=file&x=&y=&w=&h=&W=&H=&s=  crop (x,y,w,h) of the screenshot, scaled by s, centered on a WxH canvas
+const q = new URLSearchParams(location.search), n = (k) => Number(q.get(k));
+const [W, H, s] = [n('W'), n('H'), n('s') || 1];
+document.body.style.cssText = `width:${W}px;height:${H}px`;
+const c = document.querySelector('.card'), i = document.getElementById('i');
+const cw = n('w') * s, ch = n('h') * s, pad = n('pad');
+Object.assign(c.style, { width: cw + 'px', height: ch + 'px', left: (W - cw) / 2 + 'px', top: (pad ? pad : (H - ch) / 2) + 'px' });
+if (pad === -1) Object.assign(c.style, { top: '0px', left: '0px', borderRadius: '0', boxShadow: 'none' });
+Object.assign(i.style, { width: 1491 * s + 'px', left: -n('x') * s + 'px', top: -n('y') * s + 'px' });
+i.src = q.get('shot');
+</script></body></html>
