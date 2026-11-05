@@ -162,7 +162,7 @@ test('scoped token: falls through to the Atlassian gateway', async () => {
 });
 
 test('not set up: says what is missing, sends nothing', async () => {
-  const { replies, requests } = await run([call('list_spaces', {})], { CONFLUENCE_SITE: 'evil.example.com', CONFLUENCE_MACRO_KEY: '' });
+  const { replies, requests } = await run([call('list_spaces', {})], { CONFLUENCE_SITE: 'evil.example.com', CONFLUENCE_MACRO_KEY: 'not-a-key' });
   assert.equal(replies[0].result.isError, true);
   assert.match(text(replies[0]), /site .*macro key/);
   assert.equal(requests.length, 0);
@@ -176,4 +176,12 @@ test('uploads the images the file points at, from its own folder only, before th
   const ups = requests.filter((r) => r.url.endsWith('/child/attachment')).map((r) => r.body.fileName);
   assert.deepEqual(ups, ['chart.png', 'logo.svg', 'report.md']);
   assert.ok(requests.every((r) => new URL(r.url).host === 'acme.atlassian.net'), 'only talks to the site');
+});
+
+test('macro key left empty: uses the public app', async () => {
+  for (const key of ['', '${user_config.macro_key}']) {
+    const { requests } = await run([call('publish_file', { path: files.md, space_key: 'ENG' })], { CONFLUENCE_MACRO_KEY: key });
+    const node = JSON.parse(requests.find((r) => r.method === 'POST').body.body.value).content[0];
+    assert.match(node.attrs.extensionKey, /^8b606c36-.*\/static\/render-file$/);
+  }
 });

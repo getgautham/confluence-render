@@ -11,6 +11,8 @@ const IMAGE = /\.(png|jpe?g|gif|webp|svg)$/i;
 const IMAGE_REF = /!\[[^\]]*\]\(\s*<?([^)\s>]+)|<img\b[^>]*?\ssrc\s*=\s*["']?([^"'\s>]+)/gi;
 const SITE = /^[a-z0-9][a-z0-9-]*\.atlassian\.net$/;
 const KEY = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/static\/render-file$/;
+// The public Confluence app's macro. Used when the setting is left empty.
+export const DEFAULT_MACRO_KEY = '8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e/4760d118-07f7-4e19-b112-1fe62b7f66b4/static/render-file';
 const MACRO_TITLE = 'Markdown & HTML file';
 
 export class UserError extends Error {}
@@ -23,7 +25,8 @@ export function readConfig(env) {
     .toLowerCase();
   const email = String(env.CONFLUENCE_EMAIL ?? '').trim();
   const token = String(env.CONFLUENCE_API_TOKEN ?? '').trim();
-  const macroKey = String(env.CONFLUENCE_MACRO_KEY ?? '').trim();
+  let macroKey = String(env.CONFLUENCE_MACRO_KEY ?? '').trim();
+  if (!macroKey || macroKey.startsWith('${')) macroKey = DEFAULT_MACRO_KEY; // left empty (or not filled in by Claude Code)
   const missing = [];
   if (!SITE.test(site)) missing.push('site (like yourcompany.atlassian.net)');
   if (!email) missing.push('email');

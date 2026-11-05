@@ -4,7 +4,7 @@
 import { createInterface } from 'node:readline';
 import { readConfig, client, listSpaces, publish, UserError } from './confluence.mjs';
 
-const VERSION = '0.3.0';
+const VERSION = '0.3.1';
 
 const TOOLS = [
   {
@@ -45,7 +45,7 @@ const cfg = readConfig(process.env);
 const api = cfg.missing.length ? null : client(cfg);
 
 async function callTool(name, args = {}) {
-  if (!api) throw new UserError(`The Confluence plugin isn't set up. Missing: ${cfg.missing.join(', ')}. Run /plugin, pick confluence-render, and fill in its settings.`);
+  if (!api) throw new UserError(`The Confluence plugin isn't set up. Missing: ${cfg.missing.join(', ')}. Run /plugin configure confluence-render@confluence-render in Claude Code and fill them in.`);
   if (name === 'list_spaces') return listSpaces(api, args.query);
   if (name === 'publish_file') return publish(api, cfg, args);
   throw new UserError(`Unknown tool ${name}.`);

@@ -1,7 +1,7 @@
 {
   "name": "confluence-render",
   "displayName": "Confluence: Markdown & HTML",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Publish Markdown and HTML files to Confluence Cloud as real pages, shown in full by the open-source Markdown & HTML file macro.",
   "author": {
     "name": "Gautham S"
@@ -32,14 +32,14 @@
     "api_token": {
       "type": "string",
       "title": "Atlassian API token",
-      "description": "Make one at id.atlassian.com/manage-profile/security/api-tokens. Use a scoped token with only the scopes in the README. Stored in your system keychain.",
+      "description": "Make one at id.atlassian.com/manage-profile/security/api-tokens. Stored in your system keychain.",
       "required": true,
       "sensitive": true
     },
     "macro_key": {
       "type": "string",
       "title": "Macro key",
-      "description": "Leave as is unless you deployed your own copy of the Confluence app. Then open its macro settings in Confluence and copy 'Key for the Claude plugin'.",
+      "description": "Leave empty. Only if you deployed your own copy of the Confluence app: open its macro settings in Confluence and copy 'Key for the Claude plugin'.",
       "required": false,
       "default": "8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e/4760d118-07f7-4e19-b112-1fe62b7f66b4/static/render-file"
     }

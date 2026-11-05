@@ -1,100 +1,111 @@
-# confluence-render
+# Confluence: Markdown & HTML
 
-Show Markdown and HTML files in Confluence Cloud, in full. And let Claude publish them for you.
+Ask Claude for a doc, report or dashboard. It publishes it to Confluence, and your team sees it in full: tables, charts, images, even working tabs and buttons.
 
-Two parts, both open source (MIT):
+Open source (MIT). Two parts:
 
-| Part | What it does | Folder |
-| --- | --- | --- |
-| Confluence app | A **Markdown & HTML file** macro. Attach a `.md` or `.html` file to a page and the macro shows it. | [`forge-app/`](forge-app) |
-| Claude plugin | Claude writes the doc, then puts it on a Confluence page with the macro. You get the link. | [`claude-plugin/`](claude-plugin) |
+- **Confluence app.** A macro that shows a `.md` or `.html` file attached to a page.
+- **Claude Code plugin.** Claude writes the file, puts it on a page with the macro, and sends you the link.
 
-You can use the Confluence app on its own. The Claude plugin needs the app.
+## Set up (5 minutes)
 
-## Why it's safe
+### 1. Add the app to Confluence
 
-**The Confluence app**
+A site admin does this once per site.
 
-- Runs on Atlassian's own platform (Forge). No server of ours, no outside network calls, nothing stored.
-- Reads files **as the person viewing the page**. If they can't open the attachment in Confluence, they can't see it here.
-- Asks for read-only access: pages and attachments. It can't edit or delete anything.
-- Every file is shown inside a sandboxed frame. Markdown is cleaned (DOMPurify) and can't run code. HTML can't run code either, unless the page author ticks **Let this HTML run its scripts**. Even then the code runs in a locked box: it can't see Confluence, the page around it, or anyone's login. And scripts run only on the exact file and version an editor allowed. If anyone uploads a new version, or deletes the file and uploads another with the same name, it shows with scripts off until an editor allows them again.
+**[Install on your Confluence site →](https://developer.atlassian.com/console/install/8b606c36-7aa8-46c6-bb64-c23c0f0cfe6e?signature=AYABeEq8f1rfdfr1LS6%2Fr1Ltq2sAAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4CxqLTo9l4lqXuFjNim1xJM%2Bp%2F3TVP9xHS2BrU5DRRucBX8t4A9K2D79tH5GXmOIMdwAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDMphVUmQqGjdF4Pu7QIBEIA7rO%2FmQRetVyjMxR4JuBZG9npTmej75LN51jvhlJ8ztIUTe5C%2FMZlg%2F31Egwl69W8s5ArZ5P9uXUnUn3gAB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHi9bVMAkme4qVQX1fQHo6ePw3H40A7cGfz7yrmSfBWMXgHV9WHDrqIja%2BMQ%2BRAFo%2F0cAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMrijNcn%2BTQBTPDYEEAgEQgDvuw%2FjEeAUP0XBtvhbQ6IS1X9VbiRwh5VcG00B8lOL2f1hhj87iZIFF7JLQePDRhoeAI1YJuhnMa6Ci0QAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeDYASx0XCjkny4iLV6vz%2BKtEGSGT6kdt0QRpkn6D%2FlVEAQySa0raapt8Rc05aAmWySQAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAwjn0tIEvM5jNVqXg8CARCAO3nzsf5ii0WnOu0j1aGterPDC2oy1WfIGZTd9RDwiWblJoPu7Vmr8KJFw51vVaI3WBrPqzykB37L4SVIAgAAAAAMAAAQAAAAAAAAAAAAAAAAAP1fR52Ii1B%2FX7PzZWxmgcf%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADLLsbiWmueTTq4dYMfWVJfe76fUxDY4jjnqw4A5xn%2FyXFZpSTp%2BNp%2FXGzHnb2tOhgGGcFM1p4NEYv8A0NXSKoGh60E%3D&product=confluence)**
 
-**The Claude plugin**
+Pick your site, then Install. It asks only to read pages and attachments.
 
-- Under 300 lines, no dependencies. Easy to read before you trust it.
-- Your API token lives in your system keychain, not in a file.
-- Acts as you, with your Confluence permissions. Use a scoped token so it can do only what it needs (below).
-- Talks only to your `*.atlassian.net` site (or Atlassian's API gateway for scoped tokens).
-- Reads only `.md`, `.markdown`, `.html` and `.htm` files under 2 MB, plus the images they point at inside their own folder (PNG, JPG, GIF, WebP, SVG, 3 MB each). It checks where symlinks really point.
-- Two tools: list spaces, publish a file. It never deletes.
+Already done? In any Confluence page, type `/Markdown`. If you see **Markdown & HTML file**, skip this step.
 
-See [PRIVACY.md](PRIVACY.md) for what happens to your data, and [SECURITY.md](SECURITY.md) to report a problem.
+### 2. Add the plugin to Claude Code
 
-## 1. Install the Confluence app (site admin, once)
-
-You need Node 22 or 24 and an Atlassian account that can install apps on your site.
+Each person does this once. In a terminal:
 
 ```bash
-npm install -g @forge/cli
-forge login
-
-cd forge-app
-npm install
-forge register          # gives the app your own id (edits manifest.yml)
-npm run deploy          # builds and deploys to production
-forge install -e production --product confluence --site yourcompany.atlassian.net
+claude plugin marketplace add getgautham/confluence-render
+claude plugin install confluence-render@confluence-render
 ```
 
-**Use it:** drag a `.md` or `.html` file onto a page, type `/Markdown & HTML file`, pick the file in the settings, publish. With no file picked, it shows the newest `.md` or `.html` on the page.
-
-Images: attach them to the same page and point to them by name, `![Revenue](revenue.png)` or `<img src="img/revenue.png">` (the folder part is ignored). The Claude plugin uploads them for you. `data:` images work too.
-
-Tip: make HTML files self-contained (inline CSS and JS). The app makes no outside calls, so CDN scripts, web fonts and images from the web won't load.
-
-## 2. Install the Claude plugin (each person, or pushed by an admin)
-
-In Claude Code:
+Then in Claude Code:
 
 ```
-/plugin marketplace add getgautham/confluence-render
-/plugin install confluence-render@confluence-render
+/plugin configure confluence-render@confluence-render
 ```
 
-Then run `/plugin configure confluence-render@confluence-render` and fill in:
-
-| Setting | Where to get it |
+| Setting | What to enter |
 | --- | --- |
 | Confluence site | `yourcompany.atlassian.net` |
-| Atlassian email | The email you log in with |
-| API token | [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens). Pick **Create API token with scopes**, app **Confluence**, and only these scopes: `read:space:confluence`, `read:page:confluence`, `write:page:confluence`, `read:content-details:confluence`, `write:attachment:confluence` |
-| Macro key | Already filled in. Change it only if you deployed your own copy of the app: open any **Markdown & HTML file** macro's settings in Confluence, expand **Key for the Claude plugin**, copy it. |
+| Atlassian email | The email you log in to Confluence with |
+| API token | Make one at [id.atlassian.com → API tokens](https://id.atlassian.com/manage-profile/security/api-tokens). It's saved in your system keychain. |
+| Macro key | Leave empty |
 
-Then just ask: *"Write up the Q3 launch notes and put them in the ENG space."* Claude writes the file and publishes it.
+Restart Claude Code.
 
-**Claude Enterprise / Team:** an admin can add this repo as a plugin marketplace and turn the plugin on for the whole org, so people only enter their own token. See [Distribute plugins to your organization](https://claude.com/docs/plugins/org-sync).
+### 3. Use it
 
-## Try it
+Ask Claude:
 
-[`examples/`](examples) has three files to publish: a Markdown playbook with a chart image, a static HTML one-pager, and an interactive HTML dashboard (needs `run_scripts`).
+> Write a one-page Q3 summary with a revenue chart and publish it to the ENG space.
+
+Claude writes the file, publishes it and sends you the link. To change it later, ask: *"Add September to that page."*
+
+No Claude? Drag a `.md` or `.html` file onto a page, type `/Markdown & HTML file`, then publish.
+
+## What shows
+
+- **Markdown:** headings, tables, code, quotes, checklists, images.
+- **HTML:** the page's own layout and styles. Scripts (charts, tabs, filters) run only if the author allows them.
+- **Images:** keep them next to the file and link by name, `![Revenue](revenue.png)`. The plugin uploads them with the file. PNG, JPG, GIF, WebP, SVG.
+
+Try [`examples/`](examples): a Markdown playbook with a chart, a static HTML one-pager and an interactive dashboard.
+
+## Safety
+
+- **The app only reads, and reads as the person viewing.** If you can't open the attachment in Confluence, you can't see it in the macro.
+- **No outside calls.** Nothing is stored, and there's no server of ours. It runs on Atlassian (Forge) and is eligible for Runs on Atlassian.
+- **Every file shows in a sandbox** (a locked frame that can't touch Confluence or your login).
+  - Markdown is cleaned and can't run code.
+  - HTML scripts are off unless an editor allows them, and only for that exact upload. A new upload runs with scripts off until someone allows them again.
+- **The plugin is small:** about 350 lines, no dependencies.
+  - Your token stays in your keychain and goes only to your Atlassian site.
+  - It reads only the file you publish and the images in its folder.
+  - It never deletes anything.
+
+More: [PRIVACY.md](PRIVACY.md) · [SECURITY.md](SECURITY.md) (report problems here)
+
+## Limits
+
+- Confluence Cloud only, not Server or Data Center.
+- Files up to 2 MB, images up to 3 MB each.
+- Keep HTML self-contained. Web images, fonts and CDN scripts don't load.
+- On a brand-new page, the file shows after the first publish.
+- Confluence search doesn't find text inside the macro. It does find the attached file.
+- The plugin runs on your computer, so it needs Claude Code. It doesn't work in claude.ai in a browser.
+- Tested with a classic API token. Scoped tokens should work with `read:space:confluence`, `read:page:confluence`, `write:page:confluence`, `read:content-details:confluence` and `write:attachment:confluence`. Open an issue if one is missing.
+
+## For admins
+
+- **Claude Enterprise / Team:** add this repo as a plugin marketplace for your org, so people only enter their own token. See [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces).
+- **Run your own copy of the app** (Node 22 or 24):
+
+  ```bash
+  npm install -g @forge/cli && forge login
+  cd forge-app && npm install
+  forge register && npm run deploy
+  forge install -e production --product confluence --site yourcompany.atlassian.net
+  ```
+
+  Then give each person your macro key. To find it, open the macro's settings in Confluence and expand **Key for the Claude plugin**.
 
 ## Develop
 
 ```bash
-cd forge-app && npm test && npm run preview      # open http://localhost:8765/render/index.html?file=sample.md
-cd claude-plugin && npm test                     # runs the MCP server against a fake Confluence
+cd forge-app && npm test && npm run preview   # http://localhost:8765/render/index.html?file=sample.md
+cd claude-plugin && npm test                  # runs the plugin against a fake Confluence
 claude plugin validate ./claude-plugin
 ```
-
-`npm run preview` adds `&scripts=1` and `&dark=1` options to try HTML scripts and dark mode.
-
-## Limits
-
-- Confluence Cloud only (Forge). Not Server or Data Center.
-- Files up to 2 MB; images up to 3 MB each. Images from the web don't load.
-- On a brand-new page, the file shows once the page is published for the first time (Confluence keeps a new page's files private until then).
-- Text inside the macro isn't found by Confluence search. The file itself still is, as an attachment.
-- The Claude plugin starts a small local Node program, so it needs Claude Code (or a Claude app that runs local plugins), not claude.ai in a browser.
 
 ## License
 
