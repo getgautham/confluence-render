@@ -43,6 +43,7 @@ export function macroNode(macroKey, guestParams) {
       parameters: {
         layout: 'extension',
         guestParams,
+        forgeEnvironment: 'PRODUCTION',
         localId,
         extensionId: `ari:cloud:ecosystem::extension/${macroKey}`,
         extensionTitle: MACRO_TITLE,

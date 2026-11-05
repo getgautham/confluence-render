@@ -2,7 +2,6 @@
   "name": "confluence-render-forge-app",
   "private": true,
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test test/",

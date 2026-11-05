@@ -1,5 +1,5 @@
 import { invoke, view } from '@forge/bridge';
-import { buildSrcdoc } from './doc.js';
+import { buildSrcdoc, measureHeight } from './doc.js';
 
 const root = document.getElementById('root');
 const MAX_HEIGHT = 50000;
@@ -9,6 +9,7 @@ const MESSAGES = {
   'not-found': (r) => `${r.file} isn't attached to this page anymore. Pick another file in the macro settings.`,
   'too-big': (r) => `${r.file} is over 2 MB. Split it into smaller files.`,
   'no-page': () => 'This macro works on pages and blog posts.',
+  'not-published': () => "Publish the page to see this file here. Confluence keeps a new page's files private until it's published once.",
   confluence: (r) =>
     r.status === 401 || r.status === 403
       ? "You don't have access to this file."
@@ -65,8 +66,8 @@ function mount(file) {
     frame.addEventListener('load', () => {
       const doc = frame.contentDocument;
       if (!doc) return;
-      const measure = () => fit(doc.documentElement.scrollHeight);
-      new ResizeObserver(measure).observe(doc.documentElement);
+      const measure = () => fit(measureHeight(doc));
+      new ResizeObserver(measure).observe(doc.body ?? doc.documentElement);
       measure();
     });
   }

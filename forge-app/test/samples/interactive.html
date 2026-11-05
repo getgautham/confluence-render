@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Q3 sales dashboard</title>
+<style>
+  :root { --ink: #1d2433; --muted: #667085; --line: #e4e7ec; --accent: #3b5bdb; --bg: #ffffff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px; font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+  h1 { margin: 0 0 4px; font-size: 24px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .kpi b { display: block; font-size: 22px; }
+  .kpi span { color: var(--muted); font-size: 13px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+  .tabs button { border: 0; background: none; padding: 8px 14px; font: inherit; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .panel[hidden] { display: none; }
+  svg .bar { fill: var(--accent); transition: opacity .15s; }
+  svg .bar:hover { opacity: .7; }
+  svg text { font-size: 12px; fill: var(--muted); }
+  #tip { min-height: 22px; color: var(--muted); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { cursor: pointer; user-select: none; font-size: 13px; color: var(--muted); }
+  th:hover { color: var(--ink); }
+  .row-actions { margin-top: 14px; display: flex; gap: 8px; align-items: center; }
+  .row-actions button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  .row-actions button:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+  <h1>Q3 sales dashboard</h1>
+  <p class="sub">Made by Claude, shown live in Confluence.</p>
+
+  <div class="kpis">
+    <div class="kpi"><b>$184k</b><span>Revenue</span></div>
+    <div class="kpi"><b>312</b><span>New stores</span></div>
+    <div class="kpi"><b>41%</b><span>Reply rate</span></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="chart">Revenue by month</button>
+    <button role="tab" aria-selected="false" data-tab="table">Top stores</button>
+  </div>
+
+  <section class="panel" id="chart">
+    <svg id="bars" width="100%" height="200" viewBox="0 0 420 200" role="img" aria-label="Revenue by month"></svg>
+    <div id="tip">Hover a bar.</div>
+  </section>
+
+  <section class="panel" id="table" hidden>
+    <table>
+      <thead><tr><th data-key="name">Store ▾</th><th data-key="city">City</th><th data-key="orders">Orders</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="row-actions"><button id="more">Show more</button><span id="count"></span></div>
+  </section>
+
+<script>
+  const months = [['Jul', 48], ['Aug', 61], ['Sep', 75]];
+  const svg = document.getElementById('bars');
+  months.forEach(([m, v], i) => {
+    const x = 40 + i * 130, h = v * 2;
+    svg.insertAdjacentHTML('beforeend',
+      `<rect class="bar" x="${x}" y="${180 - h}" width="90" height="${h}" rx="6" data-m="${m}" data-v="${v}"></rect>` +
+      `<text x="${x + 45}" y="196" text-anchor="middle">${m}</text>`);
+  });
+  svg.addEventListener('mouseover', (e) => {
+    if (e.target.dataset.m) document.getElementById('tip').textContent = `${e.target.dataset.m}: $${e.target.dataset.v}k`;
+  });
+
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', x === b));
+    document.querySelectorAll('.panel').forEach((p) => (p.hidden = p.id !== b.dataset.tab));
+  }));
+
+  const stores = [
+    ['Green Pantry', 'Sydney', 42], ['Wholefoods Co', 'Melbourne', 38], ['Corner Organics', 'Brisbane', 51],
+    ['Harvest Lane', 'Perth', 27], ['The Grain Store', 'Adelaide', 33], ['Bondi Health', 'Sydney', 45],
+  ];
+  let shown = 3, sortKey = 'name', asc = true;
+  function render() {
+    const i = { name: 0, city: 1, orders: 2 }[sortKey];
+    const rows = [...stores].sort((a, b) => (a[i] > b[i] ? 1 : -1) * (asc ? 1 : -1)).slice(0, shown);
+    document.getElementById('rows').innerHTML = rows.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+    document.getElementById('count').textContent = `${rows.length} of ${stores.length}`;
+    document.querySelectorAll('th').forEach((th) => (th.textContent = th.textContent.replace(/ [▾▴]$/, '') + (th.dataset.key === sortKey ? (asc ? ' ▾' : ' ▴') : '')));
+  }
+  document.querySelectorAll('th').forEach((th) => th.addEventListener('click', () => {
+    asc = sortKey === th.dataset.key ? !asc : true; sortKey = th.dataset.key; render();
+  }));
+  document.getElementById('more').addEventListener('click', () => { shown = stores.length; render(); });
+  render();
+</script>
+</body>
+</html>

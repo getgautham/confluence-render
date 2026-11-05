@@ -10,11 +10,23 @@ export function mdToHtml(text) {
   return DOMPurify.sanitize(md.render(text));
 }
 
+// Height of the file's content. documentElement.scrollHeight never drops below the
+// frame's own height, so the frame could grow but never shrink back; measure the body.
+// Self-contained on purpose: it also runs inside the frame, as source text.
+export function measureHeight(d) {
+  var b = d.body;
+  if (!b) return d.documentElement.scrollHeight;
+  var w = d.defaultView;
+  var r = b.getBoundingClientRect();
+  return Math.max(r.bottom, r.top + b.scrollHeight) + w.scrollY + parseFloat(w.getComputedStyle(b).marginBottom || 0);
+}
+
 // Only used when scripts are on: the frame has no same-origin access then,
 // so it has to tell us its height.
 const HEIGHT_REPORTER =
-  '<script>(function(){var s=function(){parent.postMessage({crHeight:document.documentElement.scrollHeight},"*")};' +
-  'addEventListener("load",s);new ResizeObserver(s).observe(document.documentElement);s()})()</script>';
+  `<script>(function(){var m=${measureHeight.toString()};var s=function(){parent.postMessage({crHeight:m(document)},"*")};` +
+  'addEventListener("load",function(){s();new ResizeObserver(s).observe(document.body||document.documentElement)});' +
+  'new ResizeObserver(s).observe(document.documentElement);s()})()</script>';
 
 function withHead(html, extra) {
   const m = /<head[^>]*>/i.exec(html);

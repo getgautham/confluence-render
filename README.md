@@ -86,6 +86,7 @@ claude plugin validate ./claude-plugin
 
 - Confluence Cloud only (Forge). Not Server or Data Center.
 - Files up to 2 MB.
+- On a brand-new page, the file shows once the page is published for the first time (Confluence keeps a new page's files private until then).
 - Text inside the macro isn't found by Confluence search. The file itself still is, as an attachment.
 - The Claude plugin starts a small local Node program, so it needs Claude Code (or a Claude app that runs local plugins), not claude.ai in a browser.
 

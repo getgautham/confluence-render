@@ -1,5 +1,5 @@
 import Resolver from '@forge/resolver';
-import api, { route, getAppContext } from '@forge/api';
+import api, { route, assumeTrustedRoute, getAppContext } from '@forge/api';
 import { kindOf, pickFile, scriptsState, MAX_BYTES, MACRO_KEY } from './files.js';
 
 // Every Confluence call runs as the person viewing the page (asUser), so they
@@ -28,6 +28,7 @@ async function listFiles(pageId) {
       size: a.fileSize,
       version: a.version?.number ?? null,
       updated: a.version?.createdAt ?? '',
+      download: a.downloadLink ?? a._links?.download ?? null,
     }));
 }
 
@@ -56,9 +57,12 @@ resolver.define('getFile', async ({ context, payload }) => {
     const file = pickFile(files, wanted);
     if (!file) return { error: files.length ? 'not-found' : 'no-files', file: wanted };
     if (file.size > MAX_BYTES) return { error: 'too-big', file: file.name };
-    const res = await api
-      .asUser()
-      .requestConfluence(route`/wiki/rest/api/content/${pageId}/child/attachment/${file.id}/download`);
+    // downloadLink comes from Confluence's own reply above, so it's a trusted path.
+    // Used exactly as given: its query string carries the version and draft status.
+    if (!/^\/(download|rest\/api\/content)\//.test(file.download ?? '')) throw new HttpError(502);
+    const res = await api.asUser().requestConfluence(assumeTrustedRoute(`/wiki${file.download}`));
+    // The file is listed but won't download: the page has never been published.
+    if (res.status === 404) return { error: 'not-published', file: file.name };
     if (!res.ok) throw new HttpError(res.status);
     return {
       name: file.name,
@@ -70,6 +74,7 @@ resolver.define('getFile', async ({ context, payload }) => {
       ),
     };
   } catch (e) {
+    console.warn(`[getFile] ${e.status ?? e.name}`);
     return { error: 'confluence', status: e.status ?? null };
   }
 });
