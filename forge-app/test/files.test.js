@@ -22,11 +22,14 @@ test('pickFile: named file wins, missing name is null, default is newest', () =>
   assert.equal(pickFile([], null), null);
 });
 
-test('scriptsState: on only for the exact named html file and version', () => {
-  const file = { name: 'chart.html', version: 3 };
-  assert.equal(scriptsState({ file: 'chart.html', scripts: true, version: 3 }, file), 'on');
-  assert.equal(scriptsState({ file: 'chart.html', scripts: true, version: 2 }, file), 'stale', 'new upload');
-  assert.equal(scriptsState({ file: null, scripts: true, version: 3 }, file), 'stale', 'newest mode');
-  assert.equal(scriptsState({ file: 'chart.html', scripts: false, version: 3 }, file), 'off');
-  assert.equal(scriptsState({ file: 'notes.md', scripts: true, version: 1 }, { name: 'notes.md', version: 1 }), 'off');
+test('scriptsState: on only for the exact attachment id and version', () => {
+  const file = { id: 'att9', name: 'chart.html', version: 3 };
+  const ok = { file: 'chart.html', scripts: true, version: 3, attachment: 'att9' };
+  assert.equal(scriptsState(ok, file), 'on');
+  assert.equal(scriptsState({ ...ok, version: 2 }, file), 'stale', 'new version uploaded');
+  assert.equal(scriptsState(ok, { ...file, id: 'att10' }), 'stale', 'deleted and re-uploaded under the same name');
+  assert.equal(scriptsState({ ...ok, file: null }, file), 'stale', 'newest mode');
+  assert.equal(scriptsState({ ...ok, attachment: undefined }, file), 'stale', 'no pin saved');
+  assert.equal(scriptsState({ ...ok, scripts: false }, file), 'off');
+  assert.equal(scriptsState({ ...ok, file: 'notes.md' }, { id: 'a', name: 'notes.md', version: 3 }), 'off');
 });

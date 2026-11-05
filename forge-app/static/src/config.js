@@ -50,8 +50,15 @@ async function main() {
     try {
       const picked = (r.files ?? []).find((f) => f.name === select.value);
       const allow = scripts.checked && !$('scripts-row').hidden && !!picked;
-      // Pin scripts to the version on screen now; a later upload runs without them.
-      await view.submit({ config: { file: select.value, scripts: allow, version: allow ? picked.version : null } });
+      // Pin scripts to this exact attachment and version; any later upload runs without them.
+      await view.submit({
+        config: {
+          file: select.value,
+          scripts: allow,
+          version: allow ? picked.version : null,
+          attachment: allow ? picked.id : null,
+        },
+      });
     } catch {
       $('status').textContent = "Couldn't save. Try again.";
       $('save').disabled = false;

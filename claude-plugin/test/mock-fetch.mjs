@@ -4,6 +4,7 @@ import { appendFileSync } from 'node:fs';
 const log = process.env.MOCK_LOG;
 const scoped = process.env.MOCK_SCOPED === '1';
 const existing = process.env.MOCK_EXISTING_ADF;
+const pages = new Map(); // id -> { title, version, adf } for pages made in this run
 
 globalThis.fetch = async (url, init = {}) => {
   const method = init.method ?? 'GET';
@@ -27,17 +28,22 @@ globalThis.fetch = async (url, init = {}) => {
     const keys = u.searchParams.get('keys');
     return json({ results: keys ? all.filter((s) => s.key === keys) : all });
   }
-  if (method === 'POST' && p === '/api/v2/pages') return json({ id: '123', title: body.title, _links: { webui: '/spaces/ENG/pages/123' } });
+  if (method === 'POST' && p === '/api/v2/pages') {
+    pages.set('123', { title: body.title, version: 1, adf: body.body.value });
+    return json({ id: '123', title: body.title, version: { number: 1 }, _links: { webui: '/spaces/ENG/pages/123' } });
+  }
   if (method === 'PUT' && /^\/rest\/api\/content\/\d+\/child\/attachment$/.test(p)) {
-    return json({ results: [{ id: 'att1', version: { number: Number(process.env.MOCK_ATT_VERSION ?? 1) } }] });
+    return json({ results: [{ id: process.env.MOCK_ATT_ID ?? 'att1', version: { number: Number(process.env.MOCK_ATT_VERSION ?? 1) } }] });
   }
   if (method === 'GET' && /^\/api\/v2\/pages\/\d+$/.test(p)) {
+    const id = p.split('/').pop();
+    const pg = pages.get(id) ?? { title: 'Old page', version: 4, adf: existing ?? '{"type":"doc","version":1,"content":[]}' };
     return json({
-      id: '456',
-      title: 'Old page',
-      version: { number: 4 },
-      body: { atlas_doc_format: { value: existing ?? '{"type":"doc","version":1,"content":[]}' } },
-      _links: { webui: '/spaces/ENG/pages/456' },
+      id,
+      title: pg.title,
+      version: { number: pg.version },
+      body: { atlas_doc_format: { value: pg.adf } },
+      _links: { webui: `/spaces/ENG/pages/${id}` },
     });
   }
   if (method === 'PUT' && /^\/api\/v2\/pages\/\d+$/.test(p)) return json({ id: '456' });

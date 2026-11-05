@@ -16,11 +16,12 @@ export function pickFile(files, wanted) {
   return [...files].sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0] ?? null;
 }
 
-// Scripts run only on the exact file and version an editor allowed them on.
-// Anyone who can attach files could upload a new version, so a new version
-// shows with scripts off ('stale') until an editor allows it again.
+// Scripts run only on the exact attachment (id) and version an editor allowed.
+// Anyone who can attach files could upload a new version, or delete the file and
+// upload a new one under the same name (version restarts at 1, but the id changes).
+// Either way it shows with scripts off ('stale') until an editor allows it again.
 export function scriptsState(config, file) {
   if (config?.scripts !== true || kindOf(file.name) !== 'html') return 'off';
-  if (!config.file || config.file !== file.name || Number(config.version) !== file.version) return 'stale';
-  return 'on';
+  const same = config.file === file.name && config.attachment === file.id && Number(config.version) === file.version;
+  return same ? 'on' : 'stale';
 }

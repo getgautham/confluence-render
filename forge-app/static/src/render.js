@@ -83,7 +83,12 @@ async function main() {
   await view.theme.enable();
   const ctx = await view.getContext();
   const config = ctx.extension?.config ?? {};
-  const r = await invoke('getFile', { file: config.file || null, scripts: config.scripts, version: config.version });
+  const r = await invoke('getFile', {
+    file: config.file || null,
+    scripts: config.scripts,
+    version: config.version,
+    attachment: config.attachment,
+  });
   if (r.error) return note((MESSAGES[r.error] ?? MESSAGES.confluence)(r));
   mount(r);
 }

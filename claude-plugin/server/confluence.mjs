@@ -29,8 +29,9 @@ export function readConfig(env) {
   return { site, email, token, macroKey, missing };
 }
 
-// version pins scripts to one upload: the macro runs them only on that version.
-export function macroNode(macroKey, file, scripts, version) {
+// guestParams: { file, scripts, version, attachment }. With scripts on, version +
+// attachment id pin them to one upload: the macro runs them on that upload only.
+export function macroNode(macroKey, guestParams) {
   const localId = randomUUID();
   return {
     type: 'extension',
@@ -41,7 +42,7 @@ export function macroNode(macroKey, file, scripts, version) {
       text: MACRO_TITLE,
       parameters: {
         layout: 'extension',
-        guestParams: { file, scripts, version },
+        guestParams,
         localId,
         extensionId: `ari:cloud:ecosystem::extension/${macroKey}`,
         extensionTitle: MACRO_TITLE,
@@ -143,7 +144,31 @@ async function upload(api, pageId, file) {
   form.append('minorEdit', 'true');
   // PUT adds the file, or a new version of it if the page already has one with this name.
   const r = await api.call('PUT', `/rest/api/content/${encodeURIComponent(pageId)}/child/attachment`, { form, what: `upload ${file.name}` });
-  return r?.results?.[0]?.version?.number ?? null;
+  const att = r?.results?.[0];
+  return { id: att?.id ?? null, version: att?.version?.number ?? null };
+}
+
+// Makes sure the page shows the file. Adds the macro if it's missing; with scripts,
+// re-pins it to this exact upload (an unpinned new upload runs without scripts).
+async function placeMacro(api, cfg, pageId, name, scripts, att) {
+  const page = await api.call('GET', `/api/v2/pages/${encodeURIComponent(pageId)}?body-format=atlas_doc_format`, { what: 'read the page' });
+  const adf = JSON.parse(page.body?.atlas_doc_format?.value || '{"type":"doc","version":1,"content":[]}');
+  const node = findMacro(adf, name);
+  if (node && !scripts) return page;
+  const params = scripts ? { file: name, scripts: true, version: att.version, attachment: att.id } : { file: name, scripts: false };
+  if (node) node.attrs.parameters.guestParams = { ...node.attrs.parameters.guestParams, ...params };
+  else adf.content = [...(adf.content ?? []), macroNode(cfg.macroKey, params)];
+  await api.call('PUT', `/api/v2/pages/${encodeURIComponent(pageId)}`, {
+    what: 'update the page',
+    json: {
+      id: String(pageId),
+      status: 'current',
+      title: page.title,
+      version: { number: page.version.number + 1, message: `Shows ${name}` },
+      body: { representation: 'atlas_doc_format', value: JSON.stringify(adf) },
+    },
+  });
+  return page;
 }
 
 export async function publish(api, cfg, args) {
@@ -152,31 +177,8 @@ export async function publish(api, cfg, args) {
 
   if (args.page_id) {
     const pageId = String(args.page_id);
-    const version = await upload(api, pageId, file);
-    const page = await api.call('GET', `/api/v2/pages/${encodeURIComponent(pageId)}?body-format=atlas_doc_format`, { what: 'read the page' });
-    const adf = JSON.parse(page.body?.atlas_doc_format?.value || '{"type":"doc","version":1,"content":[]}');
-    const existing = findMacro(adf, file.name);
-    let changed = false;
-    if (!existing) {
-      adf.content = [...(adf.content ?? []), macroNode(cfg.macroKey, file.name, scripts, version)];
-      changed = true;
-    } else if (scripts) {
-      // A new upload runs without scripts unless the macro is re-pinned to it.
-      existing.attrs.parameters.guestParams = { ...existing.attrs.parameters.guestParams, file: file.name, scripts: true, version };
-      changed = true;
-    }
-    if (changed) {
-      await api.call('PUT', `/api/v2/pages/${encodeURIComponent(pageId)}`, {
-        what: 'update the page',
-        json: {
-          id: pageId,
-          status: 'current',
-          title: page.title,
-          version: { number: page.version.number + 1, message: `Added ${file.name}` },
-          body: { representation: 'atlas_doc_format', value: JSON.stringify(adf) },
-        },
-      });
-    }
+    const att = await upload(api, pageId, file);
+    const page = await placeMacro(api, cfg, pageId, file.name, scripts, att);
     return { url: api.siteUrl + (page._links?.webui ?? `/pages/${pageId}`), file: file.name, updated: true };
   }
 
@@ -184,8 +186,8 @@ export async function publish(api, cfg, args) {
   const spaces = await api.call('GET', `/api/v2/spaces?keys=${encodeURIComponent(args.space_key)}`, { what: 'find the space' });
   const space = spaces.results?.[0];
   if (!space) throw new UserError(`No space with key ${args.space_key}, or you can't see it.`);
-  // A brand-new page has no attachments, so this upload is version 1.
-  const doc = { type: 'doc', version: 1, content: [macroNode(cfg.macroKey, file.name, scripts, 1)] };
+  // Scripts stay off until the upload exists to pin them to (placeMacro below).
+  const doc = { type: 'doc', version: 1, content: [macroNode(cfg.macroKey, { file: file.name, scripts: false })] };
   const page = await api.call('POST', '/api/v2/pages', {
     what: 'create the page',
     json: {
@@ -198,9 +200,10 @@ export async function publish(api, cfg, args) {
   });
   const url = api.siteUrl + (page._links?.webui ?? `/pages/${page.id}`);
   try {
-    await upload(api, page.id, file);
+    const att = await upload(api, page.id, file);
+    if (scripts) await placeMacro(api, cfg, page.id, file.name, true, att);
   } catch (e) {
-    throw new UserError(`Made the page (${url}) but the file didn't upload. ${e.message} Run again with page_id ${page.id}.`);
+    throw new UserError(`Made the page (${url}) but didn't finish. ${e.message} Run again with page_id ${page.id}.`);
   }
   return { url, file: file.name, page_id: page.id, created: true };
 }

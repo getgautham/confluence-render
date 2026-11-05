@@ -7,7 +7,7 @@ Found a way for a file to break out of the macro's sandbox, read something it sh
 - The Confluence app makes no network calls outside Atlassian and stores nothing.
 - The app only reads, and only as the person viewing the page.
 - File content is only ever shown inside a sandboxed iframe, never in the app's own page.
-- HTML scripts run only on the exact attachment version an editor allowed; a newer upload runs with scripts off.
+- HTML scripts run only on the exact attachment (id and version) an editor allowed; a newer upload or a same-name replacement runs with scripts off.
 - The Claude plugin sends your token only to your `*.atlassian.net` site or `api.atlassian.com`, and never logs it.
 - The plugin only reads `.md` / `.html` files (after resolving symlinks) and never deletes anything.
 

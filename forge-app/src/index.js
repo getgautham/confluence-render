@@ -64,7 +64,10 @@ resolver.define('getFile', async ({ context, payload }) => {
       name: file.name,
       kind: kindOf(file.name),
       text: await res.text(),
-      scripts: scriptsState({ file: wanted, scripts: payload?.scripts, version: payload?.version }, file),
+      scripts: scriptsState(
+        { file: wanted, scripts: payload?.scripts, version: payload?.version, attachment: payload?.attachment },
+        file,
+      ),
     };
   } catch (e) {
     return { error: 'confluence', status: e.status ?? null };

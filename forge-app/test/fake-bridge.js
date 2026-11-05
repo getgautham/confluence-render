@@ -12,7 +12,7 @@ export const view = {
       }
     },
   },
-  getContext: async () => ({ extension: { config: { file, scripts: q.get('scripts') === '1', version: 1 } } }),
+  getContext: async () => ({ extension: { config: { file, scripts: q.get('scripts') === '1', version: 1, attachment: 'att1' } } }),
   submit: async (p) => console.log('submit', JSON.stringify(p)),
   close: async () => console.log('close'),
 };
