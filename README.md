@@ -29,7 +29,7 @@ You can use the Confluence app on its own. The Claude plugin needs the app.
 - Reads only `.md`, `.markdown`, `.html` and `.htm` files under 2 MB, and checks where symlinks really point.
 - Two tools: list spaces, publish a file. It never deletes.
 
-See [SECURITY.md](SECURITY.md) to report a problem.
+See [PRIVACY.md](PRIVACY.md) for what happens to your data, and [SECURITY.md](SECURITY.md) to report a problem.
 
 ## 1. Install the Confluence app (site admin, once)
 
